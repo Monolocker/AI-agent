@@ -7,15 +7,18 @@ def get_files_info(working_directory, directory="."):
     # target_dir falls within abs_path_working, finding longest sub_path shared by the two. Will be True or False
     valid_target_dir = os.path.commonpath([abs_path_working, target_dir]) == abs_path_working
 
+    # Reject paths and escape the sandbox (ex: "/bin" or "../")
     if not valid_target_dir:
         return f'Error: Cannot list "{directory}" as it is outside the permitted working directory'
     
+    # Confirm target is actually a directory (not a file or missing path)
     try:
         if not os.path.isdir(target_dir):
             return f'Error: "{directory}" is not a directory'
     except Exception as e:
         return f"Error: {e}"
     
+    # Read directory's contents. Returns a list of strings: ["main.py", "pkg", "tests.py"]
     try:
         dir_content = os.listdir(target_dir)
     except Exception as e:
@@ -28,6 +31,6 @@ def get_files_info(working_directory, directory="."):
             items.append(f"- {item}: file_size={os.path.getsize(item_path)} bytes, is_dir={os.path.isdir(item_path)}")
         except Exception as e:
             return f"Error: {e}"
-    
+     
     return "\n".join(items)
 

@@ -31,7 +31,7 @@ def main():
         print(f"Prompt tokens: {usage.prompt_token_count}")
         print(f"Response tokens: {usage.candidates_token_count}")
         print(response.text)
-    else: 
+    else:
         print(response.text)
 
 if __name__ == "__main__":
