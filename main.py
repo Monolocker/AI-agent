@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 from prompts import system_prompt
+from call_function import available_functions
 
 def main():
     parser = argparse.ArgumentParser(description="AI Toybot")
@@ -21,19 +22,21 @@ def main():
     response = client.models.generate_content(
         model = "gemini-2.5-flash", 
         contents = messages,
-        config=types.GenerateContentConfig(system_instruction=system_prompt, temperature=0)
+        config=types.GenerateContentConfig(tools=[available_functions], system_instruction=system_prompt, temperature=0)
     )
 
     usage = response.usage_metadata
     if response.usage_metadata is None:
         raise RuntimeError("Gemini API response failed")
-    
-    if args.verbose: 
-        print(f"User prompt: {args.user_prompt}")
-        print(f"Prompt tokens: {usage.prompt_token_count}")
-        print(f"Response tokens: {usage.candidates_token_count}")
-        print(response.text)
-    else:
+
+    if response.function_calls:
+        for function_call in response.function_calls:
+            print(f"Calling function: {function_call.name}({function_call.args})")
+    else: 
+        if args.verbose: 
+            print(f"User prompt: {args.user_prompt}")
+            print(f"Prompt tokens: {usage.prompt_token_count}")
+            print(f"Response tokens: {usage.candidates_token_count}")
         print(response.text)
 
 if __name__ == "__main__":
